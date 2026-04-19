@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "build-template": "node scripts/build-template.js",
+    "test-render": "node scripts/test-render.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "docxtemplater": "^3.68.5",
+    "express": "^5.2.1",
+    "pizzip": "^3.2.0"
+  }
+}

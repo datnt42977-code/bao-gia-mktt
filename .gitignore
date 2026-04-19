@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+.env
+.env.local
+.env.*.local
+*.log
+
+# Temp & sample outputs
+_tmp_*/
+~$*
+backend/templates/sample-output-*.docx
+
+# OS
+.DS_Store
+Thumbs.db
