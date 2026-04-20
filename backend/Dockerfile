@@ -1,12 +1,17 @@
 FROM node:20-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN echo "deb http://deb.debian.org/debian bookworm contrib non-free" > /etc/apt/sources.list.d/contrib.list \
+    && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+    && apt-get update && apt-get install -y --no-install-recommends \
     libreoffice \
     libreoffice-writer \
     fonts-dejavu \
     fonts-liberation \
     fonts-noto \
     fonts-noto-cjk \
+    ttf-mscorefonts-installer \
+    cabextract \
+    && fc-cache -f \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

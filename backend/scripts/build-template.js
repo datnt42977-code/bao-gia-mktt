@@ -66,10 +66,18 @@ clusters.forEach((c, i) => console.log(`  [${i}] "${c.joined}"`));
 // duplication separately. Strategy: edit `runs[i].text` in-place, then
 // rebuild xml from runs slices.
 
+const TNR_RFONTS = '<w:rFonts w:ascii="Times New Roman" w:eastAsia="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>';
 function setRunText(i, newText) {
   let r = runs[i].text;
   // Strip red color FF0000 from this run's rPr (turn placeholder text black)
   r = r.replace(/<w:color\s+w:val="FF0000"\s*\/>/gi, '');
+  // Ensure rPr exists, then force Times New Roman font (drop any existing rFonts/theme font)
+  if (!/<w:rPr>/.test(r)) {
+    r = r.replace(/<w:r\b([^>]*)>/, `<w:r$1><w:rPr>${TNR_RFONTS}</w:rPr>`);
+  } else {
+    r = r.replace(/<w:rFonts\b[^\/]*\/>/g, '');
+    r = r.replace(/<w:rPr>/, `<w:rPr>${TNR_RFONTS}`);
+  }
   // Ensure bold: inject <w:b/><w:bCs/> into rPr if missing
   if (!/<w:b\s*\/>/.test(r)) {
     r = r.replace(/<w:rPr>/, '<w:rPr><w:b/><w:bCs/>');
