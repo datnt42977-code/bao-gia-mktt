@@ -41,14 +41,17 @@ app.post('/render', async (req, res) => {
     const pdfBuf = fs.readFileSync(pdfPath);
     fs.rmSync(tmpDir, { recursive: true, force: true });
 
-    const safeName = String(data.ten_khach).replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_|_$/g, '');
+    const stripDiacritics = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    const rawName = String(data.ten_khach).replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_|_$/g, '');
+    const asciiName = stripDiacritics(rawName).replace(/[^A-Za-z0-9_]+/g, '_').replace(/^_|_$/g, '');
     const dd = String(data.ngay || '').padStart(2, '0');
     const mm = String(data.thang || '').padStart(2, '0');
     const yyyy = String(data.nam || '');
-    const fname = `Bao_Gia_Mekong_${safeName}_${dd}${mm}${yyyy}.pdf`;
+    const fnameAscii = `Bao_Gia_Mekong_${asciiName}_${dd}${mm}${yyyy}.pdf`;
+    const fnameUtf8 = `Bao_Gia_Mekong_${rawName}_${dd}${mm}${yyyy}.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${fname}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${fnameAscii}"; filename*=UTF-8''${encodeURIComponent(fnameUtf8)}`);
     res.send(pdfBuf);
   } catch (e) {
     console.error('[render]', e);
