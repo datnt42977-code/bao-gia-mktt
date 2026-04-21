@@ -18,9 +18,22 @@ app.use(express.json({ limit: '1mb' }));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
-// Truncate overly long strings so bảng không phình; nếu dài thì cắt & thêm '…'
+// Ép String + gộp khoảng trắng dư (đa space, tab, xuống dòng đầu/cuối)
+const norm = (v) => String(v ?? '').replace(/\s+/g, ' ').trim();
+// Chuẩn hoá toàn bộ cây dữ liệu: primitive -> norm(String); giữ cấu trúc array/object
+const normalizeDeep = (v) => {
+  if (v == null) return '';
+  if (Array.isArray(v)) return v.map(normalizeDeep);
+  if (typeof v === 'object') {
+    const out = {};
+    for (const k of Object.keys(v)) out[k] = normalizeDeep(v[k]);
+    return out;
+  }
+  return norm(v);
+};
+// Cắt nếu dài quá, thêm '…'
 const clamp = (v, max) => {
-  const s = String(v ?? '');
+  const s = norm(v);
   return s.length > max ? s.slice(0, max - 1) + '…' : s;
 };
 // Giới hạn mặc định cho từng field (dựa vào bề rộng ô thực tế)
@@ -31,7 +44,8 @@ const FIELD_LIMITS = {
 
 app.post('/render', async (req, res) => {
   try {
-    const data = req.body || {};
+    // Ép mọi giá trị sang String + trim/gộp whitespace trước khi render
+    const data = normalizeDeep(req.body || {});
     if (!data.ten_khach) return res.status(400).json({ error: 'Thiếu ten_khach' });
 
     // Clamp known fields
