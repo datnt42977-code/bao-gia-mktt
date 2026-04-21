@@ -226,14 +226,39 @@ newXml = newXml.replace(/<w:tbl>([\s\S]*?)<\/w:tbl>/g, (tblMatch) => {
   });
   return tbl;
 });
-// Kill excessive left indent on paragraphs inside giá bơm cells only
+// Khoá cứng chiều cao hàng (exact) cho row chứa giá bơm để không phình khi text dài
+for (const ph of ['{gia_bom_1}', '{gia_bom_3}']) {
+  const phIdx = newXml.indexOf(ph);
+  if (phIdx === -1) continue;
+  const trStart = newXml.lastIndexOf('<w:tr ', phIdx);
+  const trEnd = newXml.indexOf('</w:tr>', phIdx) + '</w:tr>'.length;
+  if (trStart === -1) continue;
+  let tr = newXml.substring(trStart, trEnd);
+  // Ensure trPr exists
+  if (!/<w:trPr>/.test(tr)) {
+    tr = tr.replace(/(<w:tr\b[^>]*>)/, '$1<w:trPr></w:trPr>');
+  }
+  // Set/replace trHeight với hRule=exact (540 twips ≈ 27pt)
+  if (/<w:trHeight\b[^\/]*\/>/.test(tr)) {
+    tr = tr.replace(/<w:trHeight\b[^\/]*\/>/, '<w:trHeight w:val="540" w:hRule="exact"/>');
+  } else {
+    tr = tr.replace(/<\/w:trPr>/, '<w:trHeight w:val="540" w:hRule="exact"/></w:trPr>');
+  }
+  newXml = newXml.substring(0, trStart) + tr + newXml.substring(trEnd);
+}
+
+// Giá bơm: xoá indent trái + hạ cỡ chữ xuống 22 half-pt (11pt) để chừa chỗ,
+// + single-line (không cho paragraph xuống dòng tự động trong cell)
 for (const ph of ['{gia_bom_1}', '{gia_bom_2}', '{gia_bom_3}', '{gia_bom_4}']) {
   const phIdx = newXml.indexOf(ph);
   if (phIdx === -1) continue;
   const tcStart = newXml.lastIndexOf('<w:tc>', phIdx);
   const tcEnd = newXml.indexOf('</w:tc>', phIdx) + '</w:tc>'.length;
   if (tcStart === -1) continue;
-  let tc = newXml.substring(tcStart, tcEnd).replace(/<w:ind\b[^\/]*\/>/g, '');
+  let tc = newXml.substring(tcStart, tcEnd)
+    .replace(/<w:ind\b[^\/]*\/>/g, '')
+    .replace(/<w:sz\s+w:val="\d+"\s*\/>/g, '<w:sz w:val="22"/>')
+    .replace(/<w:szCs\s+w:val="\d+"\s*\/>/g, '<w:szCs w:val="22"/>');
   newXml = newXml.substring(0, tcStart) + tc + newXml.substring(tcEnd);
 }
 

@@ -39,8 +39,11 @@ const clamp = (v, max) => {
 // Giới hạn mặc định cho từng field (dựa vào bề rộng ô thực tế)
 const FIELD_LIMITS = {
   ten_khach: 80, cong_trinh: 90,
-  gia_bom_1: 16, gia_bom_2: 12, gia_bom_3: 16, gia_bom_4: 12,
+  gia_bom_1: 15, gia_bom_2: 15, gia_bom_3: 15, gia_bom_4: 15,
 };
+const GIA_BOM_KEYS = ['gia_bom_1', 'gia_bom_2', 'gia_bom_3', 'gia_bom_4'];
+// Xoá mọi ký tự xuống dòng/điều khiển trong ô đơn giá bơm để không tăng chiều cao hàng
+const stripLineBreaks = (s) => String(s ?? '').replace(/[\r\n\u2028\u2029\v\f]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 app.post('/render', async (req, res) => {
   try {
@@ -48,8 +51,15 @@ app.post('/render', async (req, res) => {
     const data = normalizeDeep(req.body || {});
     if (!data.ten_khach) return res.status(400).json({ error: 'Thiếu ten_khach' });
 
-    // Clamp known fields
+    // Đơn giá bơm: hard-strip newline + clamp 15 ký tự (dài hơn → cắt + '…')
+    for (const k of GIA_BOM_KEYS) {
+      if (data[k] == null) continue;
+      const s = stripLineBreaks(data[k]);
+      data[k] = s.length > 15 ? s.slice(0, 14) + '…' : s;
+    }
+    // Clamp các field còn lại
     for (const [k, max] of Object.entries(FIELD_LIMITS)) {
+      if (GIA_BOM_KEYS.includes(k)) continue;
       if (data[k] != null) data[k] = clamp(data[k], max);
     }
     // Clamp mac_list entries
