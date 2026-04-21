@@ -18,10 +18,32 @@ app.use(express.json({ limit: '1mb' }));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
+// Truncate overly long strings so bảng không phình; nếu dài thì cắt & thêm '…'
+const clamp = (v, max) => {
+  const s = String(v ?? '');
+  return s.length > max ? s.slice(0, max - 1) + '…' : s;
+};
+// Giới hạn mặc định cho từng field (dựa vào bề rộng ô thực tế)
+const FIELD_LIMITS = {
+  ten_khach: 80, cong_trinh: 90,
+  gia_bom_1: 16, gia_bom_2: 12, gia_bom_3: 16, gia_bom_4: 12,
+};
+
 app.post('/render', async (req, res) => {
   try {
     const data = req.body || {};
     if (!data.ten_khach) return res.status(400).json({ error: 'Thiếu ten_khach' });
+
+    // Clamp known fields
+    for (const [k, max] of Object.entries(FIELD_LIMITS)) {
+      if (data[k] != null) data[k] = clamp(data[k], max);
+    }
+    // Clamp mac_list entries
+    if (Array.isArray(data.mac_list)) {
+      data.mac_list = data.mac_list.map(r => ({
+        ...r, ten: clamp(r.ten, 20), gia: clamp(r.gia, 16),
+      }));
+    }
 
     const zip = new PizZip(fs.readFileSync(TEMPLATE_PATH));
     const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });

@@ -193,6 +193,50 @@ newXml = newXml.substring(0, trStart) + newFirstRow + newXml.substring(trEnd);
 //       when the doc is opened in non-Word viewers (LibreOffice/Google Docs) ---
 newXml = newXml.replace(/<w:lastRenderedPageBreak\s*\/>/g, '');
 
+// --- 6b. Lock every table to fixed layout so cells never reflow on long data.
+//         Also force vertical-center + wrap + tcFitText on every cell. ---
+newXml = newXml.replace(/<w:tbl>([\s\S]*?)<\/w:tbl>/g, (tblMatch) => {
+  let tbl = tblMatch;
+  // Force fixed table layout (disable "Autofit to contents")
+  if (/<w:tblLayout\b[^\/]*\/>/.test(tbl)) {
+    tbl = tbl.replace(/<w:tblLayout\b[^\/]*\/>/, '<w:tblLayout w:type="fixed"/>');
+  } else {
+    tbl = tbl.replace(/<\/w:tblPr>/, '<w:tblLayout w:type="fixed"/></w:tblPr>');
+  }
+  // Per-cell: vertical center, remove noWrap (enable wrap), add tcFitText
+  tbl = tbl.replace(/<w:tc>([\s\S]*?)<\/w:tc>/g, (tcMatch) => {
+    let tc = tcMatch;
+    // Ensure tcPr exists
+    if (!/<w:tcPr>/.test(tc)) {
+      tc = tc.replace(/<w:tc>/, '<w:tc><w:tcPr></w:tcPr>');
+    }
+    // Remove any noWrap so text can wrap to next line when needed
+    tc = tc.replace(/<w:noWrap\s*\/>/g, '');
+    // Set/replace vAlign = center
+    if (/<w:vAlign\b[^\/]*\/>/.test(tc)) {
+      tc = tc.replace(/<w:vAlign\b[^\/]*\/>/, '<w:vAlign w:val="center"/>');
+    } else {
+      tc = tc.replace(/<\/w:tcPr>/, '<w:vAlign w:val="center"/></w:tcPr>');
+    }
+    // Add tcFitText so oversized content auto-shrinks horizontally
+    if (!/<w:tcFitText\s*\/>/.test(tc)) {
+      tc = tc.replace(/<\/w:tcPr>/, '<w:tcFitText/></w:tcPr>');
+    }
+    return tc;
+  });
+  return tbl;
+});
+// Kill excessive left indent on paragraphs inside giá bơm cells only
+for (const ph of ['{gia_bom_1}', '{gia_bom_2}', '{gia_bom_3}', '{gia_bom_4}']) {
+  const phIdx = newXml.indexOf(ph);
+  if (phIdx === -1) continue;
+  const tcStart = newXml.lastIndexOf('<w:tc>', phIdx);
+  const tcEnd = newXml.indexOf('</w:tc>', phIdx) + '</w:tc>'.length;
+  if (tcStart === -1) continue;
+  let tc = newXml.substring(tcStart, tcEnd).replace(/<w:ind\b[^\/]*\/>/g, '');
+  newXml = newXml.substring(0, tcStart) + tc + newXml.substring(tcEnd);
+}
+
 // --- 7. Write back to zip ---
 zip.file('word/document.xml', newXml);
 const outBuf = zip.generate({ type: 'nodebuffer' });
