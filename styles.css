@@ -1,0 +1,197 @@
+/* ================ RESET & BASE ================ */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 11pt;
+  color: #000;
+  background: #f4f4f4;
+}
+
+/* ================ FORM (screen only) ================ */
+#form {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px;
+  background: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+#form h1 { font-size: 20px; margin: 0 0 12px; }
+#form fieldset {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+}
+#form legend { font-weight: 600; padding: 0 6px; }
+#form label {
+  display: block;
+  margin: 8px 0;
+  font-size: 14px;
+}
+#form input[type="text"],
+#form input[type="number"] {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 16px;
+}
+#form label.checkbox { display: flex; align-items: center; gap: 8px; }
+#form label.checkbox input { width: 20px; height: 20px; min-height: 20px; }
+#form button {
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid #888;
+  background: #eee;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#form #btn-add-mac { margin-top: 8px; width: 100%; }
+#form .btn-primary {
+  background: #1a73e8;
+  color: #fff;
+  border-color: #1a73e8;
+  width: 100%;
+  margin-top: 8px;
+  font-weight: 600;
+}
+.extra-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
+}
+.extra-row .btn-del {
+  width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: #fee;
+  border-color: #d44;
+  color: #d44;
+  font-size: 18px;
+}
+
+/* ================ PREVIEW A4 ================ */
+#quote {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 15mm 15mm 15mm 15mm;
+  margin: 12px auto;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(0,0,0,.15);
+  color: #000;
+}
+
+.q-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1.5pt solid #000;
+  padding-bottom: 6px;
+}
+.q-logo img { height: 70px; width: auto; display: block; }
+.q-company { flex: 1; }
+.q-name { font-weight: bold; font-size: 12pt; }
+.q-addr { font-size: 10pt; }
+.q-info { font-size: 10pt; }
+
+.q-title {
+  text-align: center;
+  font-size: 18pt;
+  font-weight: bold;
+  margin: 10pt 0 6pt;
+}
+.q-date { text-align: center; margin: 4pt 0; }
+
+.q-greeting { text-align: justify; margin: 8pt 0; }
+
+.q-section {
+  color: #2D74B5;
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 10pt 0 4pt;
+}
+
+.q-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5pt;
+}
+.q-table th, .q-table td {
+  border: 0.75pt solid #000;
+  padding: 3pt 4pt;
+  vertical-align: middle;
+}
+.q-table th {
+  background: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+}
+.q-table td.num, .q-table th:nth-child(5) { text-align: right; }
+.q-table td:first-child { text-align: center; }
+
+.q-vat-note { font-style: italic; margin: 4pt 0 0; }
+
+.q-notes { font-size: 10.5pt; margin: 6pt 0; }
+.q-notes ul { padding-left: 18pt; margin: 4pt 0; }
+
+.q-signature {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24pt;
+}
+.q-sig-col {
+  width: 45%;
+  text-align: center;
+}
+.q-sig-title {
+  font-weight: bold;
+  height: 80pt;
+  border-bottom: 0;
+}
+
+/* Red editable text on screen */
+.r { color: #FF0000; }
+
+/* ================ PRINT ================ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  body { background: #fff; }
+  .no-print, #form { display: none !important; }
+  #quote {
+    width: 100%;
+    min-height: auto;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+  /* red → black when printing */
+  .r { color: #000 !important; }
+  /* avoid splitting tables across pages awkwardly */
+  .q-table { page-break-inside: auto; }
+  .q-table tr { page-break-inside: avoid; }
+  .q-section { page-break-after: avoid; }
+}
+
+/* ================ MOBILE ================ */
+@media (max-width: 800px) {
+  #quote {
+    width: 100%;
+    min-height: auto;
+    padding: 12px;
+    box-shadow: none;
+    font-size: 10pt;
+  }
+  .q-header { flex-direction: column; text-align: center; gap: 6px; }
+  .q-logo img { height: 60px; }
+  .q-table { font-size: 9.5pt; }
+}
