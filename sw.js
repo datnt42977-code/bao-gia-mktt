@@ -1,5 +1,5 @@
 // Báo Giá MKTT service worker — cache-first, bump VERSION khi deploy
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'baogia-mktt-' + VERSION;
 const ASSETS = [
   './',
@@ -8,6 +8,8 @@ const ASSETS = [
   'app.js',
   'manifest.json',
   'assets/logo.png',
+  'assets/stamp.png',
+  'assets/signature.png',
 ];
 
 self.addEventListener('install', (e) => {
