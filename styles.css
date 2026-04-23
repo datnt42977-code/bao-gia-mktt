@@ -171,7 +171,7 @@ body {
   display: flex;
   justify-content: center;
   margin-top: 240pt; /* ~20 dòng space dưới tiêu đề công ty */
-  height: 170pt;
+  height: 240pt;
   overflow: hidden;
 }
 /* Crop phần trắng phía trên của ảnh chữ ký (ảnh gốc có nhiều khoảng trắng
@@ -181,7 +181,7 @@ body {
   height: 420pt;
   width: auto;
   max-width: none;
-  margin-top: -250pt;
+  margin-top: -180pt;
 }
 
 /* Red editable text on screen */

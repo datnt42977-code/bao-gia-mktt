@@ -1,5 +1,5 @@
 // Báo Giá MKTT service worker — cache-first, bump VERSION khi deploy
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = 'baogia-mktt-' + VERSION;
 const ASSETS = [
   './',
