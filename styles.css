@@ -169,12 +169,10 @@ body {
 .q-stamp-img {
   position: absolute;
   left: 50%;
-  top: 24pt;
-  transform: translateX(-70%);
-  height: 90pt;
+  top: 18pt;
+  transform: translateX(-55%);
+  height: 95pt;
   width: auto;
-  opacity: 0.95;
-  mix-blend-mode: multiply;
 }
 
 /* Red editable text on screen */
@@ -185,6 +183,11 @@ body {
   @page {
     size: A4 portrait;
     margin: 10mm;
+  }
+  html, body, #quote, .q-stamp-img, .q-signature-img, .q-logo img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
   body { background: #fff; }
   .no-print, #form { display: none !important; }
