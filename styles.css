@@ -170,7 +170,7 @@ body {
 .q-sig-stack {
   display: flex;
   justify-content: center;
-  margin-top: 240pt; /* ~20 dòng space dưới tiêu đề công ty */
+  margin-top: 4pt; /* ngay dưới tiêu đề công ty */
   height: 240pt;
   overflow: hidden;
 }
