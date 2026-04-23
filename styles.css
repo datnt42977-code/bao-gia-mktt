@@ -86,6 +86,18 @@ body {
   background: #fff;
   box-shadow: 0 0 6px rgba(0,0,0,.15);
   color: #000;
+  position: relative;
+}
+
+/* Dấu treo — top-left hanging seal overlapping header */
+.q-hanging-stamp {
+  position: absolute;
+  top: 6mm;
+  left: 6mm;
+  height: 70pt;
+  width: auto;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .q-header {
@@ -154,25 +166,17 @@ body {
   font-weight: bold;
 }
 .q-sig-stack {
-  position: relative;
-  height: 110pt;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   margin-top: 4pt;
+  min-height: 140pt;
 }
 .q-signature-img {
-  position: absolute;
-  left: 50%;
-  top: 8pt;
-  transform: translateX(-50%);
-  height: 80pt;
+  height: 140pt;
   width: auto;
-}
-.q-stamp-img {
-  position: absolute;
-  left: 50%;
-  top: 18pt;
-  transform: translateX(-55%);
-  height: 95pt;
-  width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 /* Red editable text on screen */
@@ -184,7 +188,7 @@ body {
     size: A4 portrait;
     margin: 10mm;
   }
-  html, body, #quote, .q-stamp-img, .q-signature-img, .q-logo img {
+  html, body, #quote, .q-hanging-stamp, .q-signature-img, .q-logo img {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
