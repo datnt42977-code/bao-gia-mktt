@@ -92,13 +92,15 @@ body {
 /* Dấu treo — top-left hanging seal overlapping header */
 .q-hanging-stamp {
   position: absolute;
-  top: 6mm;
-  left: 6mm;
-  height: 70pt;
+  top: 4mm;
+  left: 4mm;
+  height: 105pt;
   width: auto;
   z-index: 2;
   pointer-events: none;
 }
+/* Logo dịch phải để chừa chỗ cho mộc, mộc đè 1/4 bên phải lên logo */
+.q-header { padding-left: 75pt; }
 
 .q-header {
   display: flex;
