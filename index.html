@@ -26,12 +26,10 @@
 
   <fieldset>
     <legend>Đơn giá bê tông (VNĐ/m³)</legend>
-    <label>M150R28 <input type="text" id="f-m150" inputmode="decimal" class="num"></label>
-    <label>M200R28 <input type="text" id="f-m200" inputmode="decimal" class="num"></label>
-    <label>M250R28 <input type="text" id="f-m250" inputmode="decimal" class="num"></label>
-    <label>M300R28 <input type="text" id="f-m300" inputmode="decimal" class="num"></label>
-    <div id="extra-list"></div>
-    <button type="button" id="btn-add-mac">+ Thêm mác</button>
+    <div class="chip-hint">Gợi ý — bấm để thêm nhanh:</div>
+    <div id="mac-chips" class="chip-row"></div>
+    <div id="mac-list"></div>
+    <button type="button" id="btn-add-mac">+ Thêm mác tự nhập</button>
   </fieldset>
 
   <fieldset>
@@ -82,12 +80,7 @@
         <th>GHI CHÚ</th>
       </tr>
     </thead>
-    <tbody id="q-mac-body">
-      <tr><td>01</td><td><span class="r">M150R28</span></td><td>M³</td><td>10±2</td><td class="num"><span class="r" id="q-m150">________</span></td><td>Mẫu 150x150mm</td></tr>
-      <tr><td>02</td><td><span class="r">M200R28</span></td><td>M³</td><td>10±2</td><td class="num"><span class="r" id="q-m200">________</span></td><td></td></tr>
-      <tr><td>03</td><td><span class="r">M250R28</span></td><td>M³</td><td>10±2</td><td class="num"><span class="r" id="q-m250">________</span></td><td></td></tr>
-      <tr><td>04</td><td><span class="r">M300R28</span></td><td>M³</td><td>10±2</td><td class="num"><span class="r" id="q-m300">________</span></td><td></td></tr>
-    </tbody>
+    <tbody id="q-mac-body"></tbody>
   </table>
   <p class="q-vat-note" id="q-vat-note">Giá chưa bao gồm VAT</p>
 
