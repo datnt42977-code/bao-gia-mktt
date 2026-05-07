@@ -66,6 +66,25 @@
     bindings.forEach(syncBinding);
     syncVat();
     syncMacPreview();
+    fitToTwoPages();
+  }
+
+  // Co font/margin theo biến --fit để toàn bộ báo giá nằm trong 2 trang A4.
+  function fitToTwoPages() {
+    const quote = document.getElementById('quote');
+    if (!quote) return;
+    const pxPerMm = 96 / 25.4;
+    // 2 trang A4 = 594mm; trừ chút dung sai cho page-break
+    const maxPx = 590 * pxPerMm;
+    const prevMin = quote.style.minHeight;
+    quote.style.minHeight = '0';
+    let scale = 1;
+    quote.style.setProperty('--fit', '1');
+    for (let i = 0; i < 25 && quote.scrollHeight > maxPx && scale > 0.7; i++) {
+      scale -= 0.02;
+      quote.style.setProperty('--fit', scale.toFixed(3));
+    }
+    quote.style.minHeight = prevMin;
   }
 
   // ---------- VAT ----------

@@ -92,6 +92,7 @@ body {
 
 /* ================ PREVIEW A4 ================ */
 #quote {
+  --fit: 1;
   width: 210mm;
   min-height: 297mm;
   padding: 15mm 15mm 15mm 15mm;
@@ -100,6 +101,7 @@ body {
   box-shadow: 0 0 6px rgba(0,0,0,.15);
   color: #000;
   position: relative;
+  font-size: calc(11pt * var(--fit));
 }
 
 /* Dấu treo — top-left hanging seal overlapping header */
@@ -124,35 +126,35 @@ body {
 }
 .q-logo img { height: 70px; width: auto; display: block; }
 .q-company { flex: 1; }
-.q-name { font-weight: bold; font-size: 12pt; }
-.q-addr { font-size: 10pt; }
-.q-info { font-size: 10pt; }
+.q-name { font-weight: bold; font-size: calc(12pt * var(--fit)); }
+.q-addr { font-size: calc(10pt * var(--fit)); }
+.q-info { font-size: calc(10pt * var(--fit)); }
 
 .q-title {
   text-align: center;
-  font-size: 18pt;
+  font-size: calc(18pt * var(--fit));
   font-weight: bold;
-  margin: 10pt 0 6pt;
+  margin: calc(10pt * var(--fit)) 0 calc(6pt * var(--fit));
 }
-.q-date { text-align: center; margin: 4pt 0; }
+.q-date { text-align: center; margin: calc(4pt * var(--fit)) 0; }
 
-.q-greeting { text-align: justify; margin: 8pt 0; }
+.q-greeting { text-align: justify; margin: calc(8pt * var(--fit)) 0; }
 
 .q-section {
   color: #2D74B5;
-  font-size: 12pt;
+  font-size: calc(12pt * var(--fit));
   font-weight: bold;
-  margin: 10pt 0 4pt;
+  margin: calc(10pt * var(--fit)) 0 calc(4pt * var(--fit));
 }
 
 .q-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10.5pt;
+  font-size: calc(10.5pt * var(--fit));
 }
 .q-table th, .q-table td {
   border: 0.75pt solid #000;
-  padding: 3pt 4pt;
+  padding: calc(3pt * var(--fit)) calc(4pt * var(--fit));
   vertical-align: middle;
 }
 .q-table th {
@@ -163,15 +165,15 @@ body {
 .q-table td.num, .q-table th:nth-child(5) { text-align: right; }
 .q-table td:first-child { text-align: center; }
 
-.q-vat-note { font-style: italic; margin: 4pt 0 0; }
+.q-vat-note { font-style: italic; margin: calc(4pt * var(--fit)) 0 0; }
 
-.q-notes { font-size: 10.5pt; margin: 6pt 0; }
-.q-notes ul { padding-left: 18pt; margin: 4pt 0; }
+.q-notes { font-size: calc(10.5pt * var(--fit)); margin: calc(6pt * var(--fit)) 0; }
+.q-notes ul { padding-left: 18pt; margin: calc(4pt * var(--fit)) 0; }
 
 .q-signature {
   display: flex;
   justify-content: space-between;
-  margin-top: 24pt;
+  margin-top: calc(24pt * var(--fit));
 }
 .q-sig-col {
   width: 45%;
