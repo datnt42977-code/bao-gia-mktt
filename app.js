@@ -69,21 +69,33 @@
     fitToTwoPages();
   }
 
-  // Co font/margin theo biến --fit để toàn bộ báo giá nằm trong 2 trang A4.
+  // Co/giãn font + margin theo biến --fit để báo giá lấp gần đầy 2 trang A4
+  // mà không tràn sang trang 3.
   function fitToTwoPages() {
     const quote = document.getElementById('quote');
     if (!quote) return;
     const pxPerMm = 96 / 25.4;
-    // 2 trang A4 = 594mm; trừ chút dung sai cho page-break
-    const maxPx = 590 * pxPerMm;
+    // Trần cứng = 2 trang A4 (594mm) trừ dung sai cho page-break
+    const maxPx = 588 * pxPerMm;
+    // Mục tiêu lấp đầy ≈ 98% của 2 trang để chữ to nhất có thể
+    const targetPx = 580 * pxPerMm;
     const prevMin = quote.style.minHeight;
     quote.style.minHeight = '0';
-    let scale = 1;
-    quote.style.setProperty('--fit', '1');
-    for (let i = 0; i < 25 && quote.scrollHeight > maxPx && scale > 0.7; i++) {
-      scale -= 0.02;
-      quote.style.setProperty('--fit', scale.toFixed(3));
+    // Bracket scale trong [0.70, 1.40], tìm giá trị lớn nhất mà vẫn ≤ maxPx
+    let lo = 0.70, hi = 1.40, best = 1;
+    for (let i = 0; i < 18; i++) {
+      const mid = (lo + hi) / 2;
+      quote.style.setProperty('--fit', mid.toFixed(3));
+      const h = quote.scrollHeight;
+      if (h <= maxPx) {
+        best = mid;
+        if (h >= targetPx) break; // đủ lấp đầy, dừng
+        lo = mid;
+      } else {
+        hi = mid;
+      }
     }
+    quote.style.setProperty('--fit', best.toFixed(3));
     quote.style.minHeight = prevMin;
   }
 
