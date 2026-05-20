@@ -75,10 +75,11 @@
     const quote = document.getElementById('quote');
     if (!quote) return;
     const pxPerMm = 96 / 25.4;
-    // Trần cứng = 2 trang A4 (594mm) trừ dung sai cho page-break
-    const maxPx = 588 * pxPerMm;
-    // Mục tiêu lấp đầy ≈ 98% của 2 trang để chữ to nhất có thể
-    const targetPx = 580 * pxPerMm;
+    // @page margin: 10mm × (top+bottom) × 2 trang = 40mm bị trừ
+    // → vùng in thực = 594 - 40 = 554mm. Lùi 6mm cho dung sai page-break.
+    const maxPx = 548 * pxPerMm;
+    // Mục tiêu lấp đầy ≈ 98% vùng in
+    const targetPx = 540 * pxPerMm;
 
     // Tạm ép #quote về đúng kích thước A4 (210mm) khi đo, để scrollHeight
     // khớp với layout in. Nếu không, trên mobile #quote bị CSS responsive
