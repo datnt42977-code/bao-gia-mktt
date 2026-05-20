@@ -79,11 +79,26 @@
     const maxPx = 588 * pxPerMm;
     // Mục tiêu lấp đầy ≈ 98% của 2 trang để chữ to nhất có thể
     const targetPx = 580 * pxPerMm;
+
+    // Tạm ép #quote về đúng kích thước A4 (210mm) khi đo, để scrollHeight
+    // khớp với layout in. Nếu không, trên mobile #quote bị CSS responsive
+    // co còn width viewport (~375px), content wrap dài gấp đôi → fit sai.
     const prevMin = quote.style.minHeight;
+    const prevWidth = quote.style.width;
+    const prevMaxW = quote.style.maxWidth;
+    const prevPad = quote.style.padding;
+    const prevFontSize = quote.style.fontSize;
     quote.style.minHeight = '0';
-    // Bracket scale trong [0.70, 1.40], tìm giá trị lớn nhất mà vẫn ≤ maxPx
-    let lo = 0.70, hi = 1.40, best = 1;
-    for (let i = 0; i < 18; i++) {
+    quote.style.width = '210mm';
+    quote.style.maxWidth = '210mm';
+    quote.style.padding = '15mm';
+    quote.style.fontSize = 'calc(11pt * var(--fit))';
+
+    // Bracket scale trong [0.55, 1.40]. Sàn 0.55 đủ co cho ≥3 mác bê tông
+    // vẫn vừa 2 trang. Init best = lo để worst-case dùng scale nhỏ nhất,
+    // tránh fallback về 1 gây tràn trang 3.
+    let lo = 0.55, hi = 1.40, best = lo;
+    for (let i = 0; i < 20; i++) {
       const mid = (lo + hi) / 2;
       quote.style.setProperty('--fit', mid.toFixed(3));
       const h = quote.scrollHeight;
@@ -96,7 +111,13 @@
       }
     }
     quote.style.setProperty('--fit', best.toFixed(3));
+
+    // Khôi phục style để CSS responsive tiếp quản trên mobile
     quote.style.minHeight = prevMin;
+    quote.style.width = prevWidth;
+    quote.style.maxWidth = prevMaxW;
+    quote.style.padding = prevPad;
+    quote.style.fontSize = prevFontSize;
   }
 
   // ---------- VAT ----------
