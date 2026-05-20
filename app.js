@@ -75,11 +75,13 @@
     const quote = document.getElementById('quote');
     if (!quote) return;
     const pxPerMm = 96 / 25.4;
-    // @page margin: 10mm × (top+bottom) × 2 trang = 40mm bị trừ
-    // → vùng in thực = 594 - 40 = 554mm. Lùi 6mm cho dung sai page-break.
-    const maxPx = 548 * pxPerMm;
-    // Mục tiêu lấp đầy ≈ 98% vùng in
-    const targetPx = 540 * pxPerMm;
+    // @page margin: 8mm × (top+bottom) × 2 trang = 32mm bị trừ
+    // → vùng in lý thuyết = 594 - 32 = 562mm.
+    // Lùi sâu hơn (40mm) vì iOS Safari có thể ép margin tối thiểu lớn hơn
+    // và .q-signature là flex block không tách trang được → cần buffer
+    // đủ rộng để nguyên cục chữ ký lọt trang 2.
+    const maxPx = 520 * pxPerMm;
+    const targetPx = 510 * pxPerMm;
 
     // Tạm ép #quote về đúng kích thước A4 (210mm) khi đo, để scrollHeight
     // khớp với layout in. Nếu không, trên mobile #quote bị CSS responsive
@@ -95,10 +97,10 @@
     quote.style.padding = '15mm';
     quote.style.fontSize = 'calc(11pt * var(--fit))';
 
-    // Bracket scale trong [0.55, 1.40]. Sàn 0.55 đủ co cho ≥3 mác bê tông
+    // Bracket scale trong [0.45, 1.40]. Sàn 0.45 đủ co cho ≥3 mác bê tông
     // vẫn vừa 2 trang. Init best = lo để worst-case dùng scale nhỏ nhất,
     // tránh fallback về 1 gây tràn trang 3.
-    let lo = 0.55, hi = 1.40, best = lo;
+    let lo = 0.45, hi = 1.40, best = lo;
     for (let i = 0; i < 20; i++) {
       const mid = (lo + hi) / 2;
       quote.style.setProperty('--fit', mid.toFixed(3));

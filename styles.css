@@ -206,7 +206,7 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 8mm;
   }
   html, body, #quote, .q-hanging-stamp, .q-signature-img, .q-logo img {
     -webkit-print-color-adjust: exact !important;
@@ -228,6 +228,8 @@ body {
   .q-table { page-break-inside: auto; }
   .q-table tr { page-break-inside: avoid; }
   .q-section { page-break-after: avoid; }
+  /* chữ ký phải giữ nguyên 1 cục, không tách trang */
+  .q-signature { page-break-inside: avoid; break-inside: avoid; }
 }
 
 /* ================ MOBILE ================ */
