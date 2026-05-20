@@ -1,5 +1,8 @@
-// Báo Giá MKTT service worker — cache-first, bump VERSION khi deploy
-const VERSION = 'v12';
+// Báo Giá MKTT service worker
+// - App shell (html/js/css): network-first → luôn lấy bản mới, fallback cache khi offline
+// - Assets (ảnh, manifest): cache-first cho tốc độ
+// Bump VERSION khi deploy để xoá cache cũ.
+const VERSION = 'v13';
 const CACHE = 'baogia-mktt-' + VERSION;
 const ASSETS = [
   './',
@@ -11,6 +14,9 @@ const ASSETS = [
   'assets/stamp.png',
   'assets/signature.png',
 ];
+
+// File nào phải luôn lấy bản mới (network-first)
+const APP_SHELL = /\/(index\.html|app\.js|styles\.css)(\?|$)|\/$/;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -26,10 +32,27 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  const isAppShell = APP_SHELL.test(url.pathname);
+
+  if (isAppShell) {
+    // network-first: thử mạng trước, lưu vào cache, fallback cache nếu offline
+    e.respondWith(
+      fetch(e.request).then((res) => {
+        if (res.ok && url.origin === location.origin) {
+          const clone = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request).then((hit) => hit || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // cache-first cho assets
   e.respondWith(
     caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
-      // cache same-origin successful responses opportunistically
-      if (res.ok && new URL(e.request.url).origin === location.origin) {
+      if (res.ok && url.origin === location.origin) {
         const clone = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, clone));
       }

@@ -245,7 +245,16 @@
 
     document.getElementById('btn-print').addEventListener('click', () => {
       saveState();
-      window.print();
+      // Một số iOS PWA standalone không hỗ trợ window.print() → báo cho user
+      if (typeof window.print !== 'function') {
+        alert('Trình duyệt này không hỗ trợ in. Hãy mở Báo Giá trong Safari/Chrome và dùng menu Chia sẻ → In.');
+        return;
+      }
+      try {
+        window.print();
+      } catch (err) {
+        alert('Không mở được hộp thoại in. Vui lòng dùng menu Chia sẻ → In của trình duyệt.');
+      }
     });
 
     loadState();
