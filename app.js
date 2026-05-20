@@ -81,11 +81,8 @@
     const targetPx = 580 * pxPerMm;
     const prevMin = quote.style.minHeight;
     quote.style.minHeight = '0';
-    // Bracket scale trong [0.60, 0.95] — trần 0.95 = nhỏ hơn 5% so với base,
-    // sàn 0.60 đủ co để chứa ≥3 mác bê tông trong 2 trang.
-    // Khởi tạo best = lo để worst-case (content quá lớn) vẫn dùng scale nhỏ nhất,
-    // tránh fallback về 1 gây tràn trang 3.
-    let lo = 0.60, hi = 0.95, best = lo;
+    // Bracket scale trong [0.70, 1.40], tìm giá trị lớn nhất mà vẫn ≤ maxPx
+    let lo = 0.70, hi = 1.40, best = 1;
     for (let i = 0; i < 18; i++) {
       const mid = (lo + hi) / 2;
       quote.style.setProperty('--fit', mid.toFixed(3));
