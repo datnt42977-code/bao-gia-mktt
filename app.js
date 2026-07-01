@@ -131,7 +131,9 @@
   }
 
   // ---------- dynamic mác rows ----------
-  let rows = []; // [{name, price}]
+  let rows = []; // [{name, price, slump}]
+  const SLUMP_OPTIONS = ['10', '12', '14', '16', '18', '20'];
+  const DEFAULT_SLUMP = '10';
 
   function renderChips() {
     const root = document.getElementById('mac-chips');
@@ -143,7 +145,7 @@
       btn.textContent = name;
       btn.addEventListener('click', () => {
         if (rows.length >= MAX_ROWS) return;
-        rows.push({ name, price: '' });
+        rows.push({ name, price: '', slump: DEFAULT_SLUMP });
         renderRowList();
         onAnyChange();
         // focus the new price input for fast entry
@@ -160,18 +162,27 @@
     rows.forEach((row, idx) => {
       const div = document.createElement('div');
       div.className = 'extra-row';
+      const slump = row.slump || DEFAULT_SLUMP;
+      const options = SLUMP_OPTIONS.map((s) =>
+        `<option value="${s}"${s === slump ? ' selected' : ''}>${s}±2</option>`
+      ).join('');
       div.innerHTML = `
         <input type="text" placeholder="Tên mác" data-field="name" value="${escapeHtml(row.name)}">
         <input type="text" placeholder="Đơn giá" inputmode="decimal" data-field="price" value="${escapeHtml(row.price)}">
+        <select data-field="slump" aria-label="Độ sụt">${options}</select>
         <button type="button" class="btn-del" aria-label="Xóa">×</button>
       `;
-      const [nameInput, priceInput, delBtn] = div.querySelectorAll('input, button');
+      const nameInput = div.querySelector('input[data-field="name"]');
+      const priceInput = div.querySelector('input[data-field="price"]');
+      const slumpSelect = div.querySelector('select[data-field="slump"]');
+      const delBtn = div.querySelector('.btn-del');
       nameInput.addEventListener('input', () => { rows[idx].name = nameInput.value; onAnyChange(); });
       priceInput.addEventListener('input', () => {
         priceInput.value = formatVN(priceInput.value);
         rows[idx].price = priceInput.value;
         onAnyChange();
       });
+      slumpSelect.addEventListener('change', () => { rows[idx].slump = slumpSelect.value; onAnyChange(); });
       delBtn.addEventListener('click', () => {
         rows.splice(idx, 1);
         renderRowList();
@@ -194,7 +205,7 @@
         <td>${stt}</td>
         <td><span class="r">${escapeHtml(row.name) || '________'}</span></td>
         <td>M³</td>
-        <td>10±2</td>
+        <td>${escapeHtml(row.slump || DEFAULT_SLUMP)}±2</td>
         <td class="num"><span class="r">${escapeHtml(row.price) || '________'}</span></td>
         <td></td>
       `;
@@ -237,6 +248,8 @@
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
     document.getElementById('f-vat').checked = !!state.vat;
     rows = Array.isArray(state.rows) ? state.rows.slice(0, MAX_ROWS) : [];
+    // migrate: dòng cũ chưa có độ sụt → mặc định 10
+    rows.forEach((r) => { if (!r.slump) r.slump = DEFAULT_SLUMP; });
   }
 
   const val = (id) => (document.getElementById(id)?.value || '');
@@ -260,7 +273,7 @@
 
     document.getElementById('btn-add-mac').addEventListener('click', () => {
       if (rows.length >= MAX_ROWS) return;
-      rows.push({ name: '', price: '' });
+      rows.push({ name: '', price: '', slump: DEFAULT_SLUMP });
       renderRowList();
       onAnyChange();
       const last = document.querySelector('#mac-list .extra-row:last-child input[data-field="name"]');

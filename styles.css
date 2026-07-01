@@ -75,10 +75,14 @@ body {
 }
 .extra-row {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr auto auto;
   gap: 6px;
   margin-top: 6px;
   align-items: center;
+}
+.extra-row select[data-field="slump"] {
+  min-height: 36px;
+  padding: 0 6px;
 }
 .extra-row .btn-del {
   width: 36px;
