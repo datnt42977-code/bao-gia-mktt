@@ -132,8 +132,16 @@
 
   // ---------- dynamic mác rows ----------
   let rows = []; // [{name, price, slump}]
-  const SLUMP_OPTIONS = ['10', '12', '14', '16', '18', '20'];
-  const DEFAULT_SLUMP = '10';
+  // Nhãn độ sụt hiển thị nguyên văn; "19±1" là loại đặc biệt.
+  const SLUMP_OPTIONS = ['10±2', '12±2', '14±2', '16±2', '18±2', '19±1', '20±2'];
+  const DEFAULT_SLUMP = '10±2';
+  // Chuẩn hoá state cũ (chỉ lưu số như "10") sang nhãn mới ("10±2").
+  const normalizeSlump = (s) => {
+    if (!s) return DEFAULT_SLUMP;
+    if (SLUMP_OPTIONS.includes(s)) return s;
+    const withTol = s + '±2';
+    return SLUMP_OPTIONS.includes(withTol) ? withTol : DEFAULT_SLUMP;
+  };
 
   function renderChips() {
     const root = document.getElementById('mac-chips');
@@ -162,9 +170,9 @@
     rows.forEach((row, idx) => {
       const div = document.createElement('div');
       div.className = 'extra-row';
-      const slump = row.slump || DEFAULT_SLUMP;
+      const slump = normalizeSlump(row.slump);
       const options = SLUMP_OPTIONS.map((s) =>
-        `<option value="${s}"${s === slump ? ' selected' : ''}>${s}±2</option>`
+        `<option value="${s}"${s === slump ? ' selected' : ''}>${s}</option>`
       ).join('');
       div.innerHTML = `
         <input type="text" placeholder="Tên mác" data-field="name" value="${escapeHtml(row.name)}">
@@ -205,7 +213,7 @@
         <td>${stt}</td>
         <td><span class="r">${escapeHtml(row.name) || '________'}</span></td>
         <td>M³</td>
-        <td>${escapeHtml(row.slump || DEFAULT_SLUMP)}±2</td>
+        <td>${escapeHtml(normalizeSlump(row.slump))}</td>
         <td class="num"><span class="r">${escapeHtml(row.price) || '________'}</span></td>
         <td></td>
       `;
@@ -248,8 +256,8 @@
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
     document.getElementById('f-vat').checked = !!state.vat;
     rows = Array.isArray(state.rows) ? state.rows.slice(0, MAX_ROWS) : [];
-    // migrate: dòng cũ chưa có độ sụt → mặc định 10
-    rows.forEach((r) => { if (!r.slump) r.slump = DEFAULT_SLUMP; });
+    // migrate: chuẩn hoá độ sụt dòng cũ ("10" → "10±2", thiếu → mặc định)
+    rows.forEach((r) => { r.slump = normalizeSlump(r.slump); });
   }
 
   const val = (id) => (document.getElementById(id)?.value || '');
