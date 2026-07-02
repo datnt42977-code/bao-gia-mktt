@@ -65,8 +65,24 @@
   function syncAll() {
     bindings.forEach(syncBinding);
     syncVat();
+    syncExtra();
     syncMacPreview();
     fitToTwoPages();
+  }
+
+  // ---------- ghi chú thêm (yêu cầu khác) ----------
+  function syncExtra() {
+    const input = document.getElementById('f-extra');
+    const out = document.getElementById('q-extra-body');
+    if (!input || !out) return;
+    const text = input.value.trim();
+    if (text) {
+      // giữ xuống dòng người dùng nhập
+      out.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
+    } else {
+      // để trống: hiện dòng kẻ để điền tay khi in
+      out.innerHTML = '<div class="q-blank-line"></div><div class="q-blank-line"></div>';
+    }
   }
 
   // Co/giãn font + margin theo biến --fit để báo giá lấp gần đầy 2 trang A4
@@ -235,6 +251,7 @@
       pump1Ca: val('f-pump1-ca'), pump1M3: val('f-pump1-m3'),
       pump2Ca: val('f-pump2-ca'), pump2M3: val('f-pump2-m3'),
       vat: document.getElementById('f-vat').checked,
+      extra: val('f-extra'),
       rows,
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
@@ -255,6 +272,7 @@
     setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
     document.getElementById('f-vat').checked = !!state.vat;
+    setVal('f-extra', state.extra);
     rows = Array.isArray(state.rows) ? state.rows.slice(0, MAX_ROWS) : [];
     // migrate: chuẩn hoá độ sụt dòng cũ ("10" → "10±2", thiếu → mặc định)
     rows.forEach((r) => { r.slump = normalizeSlump(r.slump); });
@@ -278,6 +296,7 @@
       el.addEventListener('input', onAnyChange);
     });
     document.getElementById('f-vat').addEventListener('change', onAnyChange);
+    document.getElementById('f-extra').addEventListener('input', onAnyChange);
 
     document.getElementById('btn-add-mac').addEventListener('click', () => {
       if (rows.length >= MAX_ROWS) return;
