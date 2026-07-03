@@ -1,7 +1,7 @@
 ---
 name: Báo Giá Thông Minh — Template + Lịch Sử
 description: Template bảng giá mặc định tự điền + lịch sử báo giá + autocomplete tên khách, thuần localStorage
-status: pending
+status: completed
 created: 2026-07-03
 brainstorm: plans/reports/brainstorm-260703-2307-smart-quote-template-history.md
 ---
@@ -35,9 +35,9 @@ baogia-mktt-quotes-v1     { quotes: [ { id, savedAt, date, customer, project,
 
 | # | Phase | File | Status | Est |
 |---|---|---|---|---|
-| 1 | Data layer `quotes-store.js` | [phase-01-quotes-store.md](phase-01-quotes-store.md) | pending | 45m |
-| 2 | Template mặc định + refactor app.js | [phase-02-template.md](phase-02-template.md) | pending | 1h |
-| 3 | Lịch sử + autocomplete + sw bump | [phase-03-history-autocomplete.md](phase-03-history-autocomplete.md) | pending | 1h |
+| 1 | Data layer `quotes-store.js` | [phase-01-quotes-store.md](phase-01-quotes-store.md) | completed | 45m |
+| 2 | Template mặc định + refactor app.js | [phase-02-template.md](phase-02-template.md) | completed | 1h |
+| 3 | Lịch sử + autocomplete + sw bump | [phase-03-history-autocomplete.md](phase-03-history-autocomplete.md) | completed | 1h |
 
 ## Dependencies
 - Phase 1 → 2 → 3 (tuần tự). Phase 2 & 3 đều dùng API của Phase 1.
