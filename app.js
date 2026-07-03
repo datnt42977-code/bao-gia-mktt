@@ -39,9 +39,6 @@
 
   // ---------- simple bind: form → preview (non-mác fields) ----------
   const bindings = [
-    ['f-day', 'q-day'],
-    ['f-month', 'q-month'],
-    ['f-year', 'q-year'],
     ['f-customer', 'q-customer'],
     ['f-project', 'q-project'],
     ['f-pump1-ca', 'q-pump1-ca', true],
@@ -62,8 +59,45 @@
     }
   }
 
+  // ---------- ngày báo giá (1 ô dd/mm/yyyy) ----------
+  // Tách chuỗi "dd/mm/yyyy" thành {day, month, year}; thiếu phần nào để rỗng.
+  function parseDate(s) {
+    const p = String(s || '').split('/');
+    return { day: (p[0] || '').trim(), month: (p[1] || '').trim(), year: (p[2] || '').trim() };
+  }
+
+  // Tự chèn dấu "/" khi gõ: 03072026 → 03/07/2026
+  function attachDateFormatter(input) {
+    input.addEventListener('input', () => {
+      const d = digitsOnly(input.value).slice(0, 8);
+      let out = d;
+      if (d.length > 4) out = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4);
+      else if (d.length > 2) out = d.slice(0, 2) + '/' + d.slice(2);
+      input.value = out;
+      onAnyChange();
+    });
+  }
+
+  function syncDate() {
+    const input = document.getElementById('f-date');
+    if (!input) return;
+    const { day, month, year } = parseDate(input.value);
+    setText('q-day', day || '__');
+    setText('q-month', month || '__');
+    setText('q-year', year || '____');
+  }
+
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  function formatToday() {
+    const now = new Date();
+    const pad = (v) => String(v).padStart(2, '0');
+    return pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear();
+  }
+
   function syncAll() {
     bindings.forEach(syncBinding);
+    syncDate();
     syncVat();
     syncExtra();
     syncMacPreview();
@@ -246,7 +280,7 @@
   // ---------- persistence ----------
   function saveState() {
     const state = {
-      day: val('f-day'), month: val('f-month'), year: val('f-year'),
+      date: val('f-date'),
       customer: val('f-customer'), project: val('f-project'),
       pump1Ca: val('f-pump1-ca'), pump1M3: val('f-pump1-m3'),
       pump2Ca: val('f-pump2-ca'), pump2M3: val('f-pump2-m3'),
@@ -261,13 +295,16 @@
     let state = null;
     try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (_) {}
     if (!state) {
-      const now = new Date();
-      setVal('f-day', String(now.getDate()));
-      setVal('f-month', String(now.getMonth() + 1));
-      setVal('f-year', String(now.getFullYear()));
+      setVal('f-date', formatToday());
       return;
     }
-    setVal('f-day', state.day); setVal('f-month', state.month); setVal('f-year', state.year);
+    // migrate: state cũ lưu day/month/year riêng → ghép "dd/mm/yyyy"
+    let date = state.date;
+    if (!date && (state.day || state.month || state.year)) {
+      const pad = (v, n) => String(v || '').padStart(n, '0');
+      date = pad(state.day, 2) + '/' + pad(state.month, 2) + '/' + pad(state.year, 4);
+    }
+    setVal('f-date', date);
     setVal('f-customer', state.customer); setVal('f-project', state.project);
     setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
@@ -291,8 +328,9 @@
 
   function init() {
     document.querySelectorAll('#form input.num').forEach(attachNumberFormatter);
+    attachDateFormatter(document.getElementById('f-date'));
     document.querySelectorAll('#form input[type="text"], #form input[type="number"]').forEach((el) => {
-      if (el.classList.contains('num')) return;
+      if (el.classList.contains('num') || el.id === 'f-date') return;
       el.addEventListener('input', onAnyChange);
     });
     document.getElementById('f-vat').addEventListener('change', onAnyChange);
