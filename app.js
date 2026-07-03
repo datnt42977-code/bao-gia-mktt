@@ -331,13 +331,8 @@
     let state = null;
     try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (_) {}
     if (!state) { applyState({ date: formatToday() }); return; }
-    // migrate: state cũ lưu day/month/year riêng → ghép "dd/mm/yyyy"
-    let date = state.date;
-    if (!date && (state.day || state.month || state.year)) {
-      const pad = (v, n) => String(v || '').padStart(n, '0');
-      date = pad(state.day, 2) + '/' + pad(state.month, 2) + '/' + pad(state.year, 4);
-    }
-    applyState(Object.assign({}, state, { date }));
+    // Ngày báo giá luôn gợi ý = hôm nay (vẫn sửa được); các field khác giữ từ bản nháp.
+    applyState(Object.assign({}, state, { date: formatToday() }));
   }
 
   const val = (id) => (document.getElementById(id)?.value || '');
