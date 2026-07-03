@@ -104,19 +104,22 @@
     fitToTwoPages();
   }
 
-  // ---------- ghi chú thêm (yêu cầu khác) ----------
+  // ---------- ghi chú thêm ----------
+  // Mỗi dòng người dùng nhập → 1 gạch đầu dòng nối vào cuối danh sách Ghi chú.
   function syncExtra() {
     const input = document.getElementById('f-extra');
-    const out = document.getElementById('q-extra-body');
-    if (!input || !out) return;
-    const text = input.value.trim();
-    if (text) {
-      // giữ xuống dòng người dùng nhập
-      out.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
-    } else {
-      // để trống: hiện dòng kẻ để điền tay khi in
-      out.innerHTML = '<div class="q-blank-line"></div><div class="q-blank-line"></div>';
-    }
+    const list = document.getElementById('q-notes-list');
+    if (!input || !list) return;
+    // xoá các bullet phụ đã thêm lần trước
+    list.querySelectorAll('.q-note-extra').forEach((el) => el.remove());
+    input.value.split('\n').forEach((line) => {
+      const t = line.trim();
+      if (!t) return;
+      const li = document.createElement('li');
+      li.className = 'q-note-extra';
+      li.textContent = t;
+      list.appendChild(li);
+    });
   }
 
   // Co/giãn font + margin theo biến --fit để báo giá lấp gần đầy 2 trang A4

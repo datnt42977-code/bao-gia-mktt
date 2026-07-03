@@ -48,9 +48,9 @@
   </fieldset>
 
   <fieldset>
-    <legend>Yêu cầu khác (ghi chú thêm)</legend>
-    <label>Điền thông tin phát sinh (nếu có)
-      <textarea id="f-extra" rows="3" placeholder="Để trống nếu không có. Nội dung sẽ hiển thị dưới phần Ghi chú."></textarea>
+    <legend>Ghi chú thêm</legend>
+    <label>Thêm dòng ghi chú (nếu có)
+      <textarea id="f-extra" rows="3" placeholder="Mỗi dòng sẽ thành 1 gạch đầu dòng trong phần Ghi chú."></textarea>
     </label>
   </fieldset>
 
@@ -117,7 +117,7 @@
 
   <div class="q-notes">
     <p><strong>Ghi chú:</strong></p>
-    <ul>
+    <ul id="q-notes-list">
       <li>Nếu sử dụng Đá Mi thì đơn giá Cộng 120.000đ/m³.</li>
       <li>Nếu phát sinh tăng cấp độ sụt lên thêm mỗi 2cm thì đơn giá trên cộng thêm 20.000 đồng/m³.</li>
       <li>Nếu Tăng/Giảm cấp mác thì đơn giá Cộng/Trừ 50.000đ/m³.</li>
@@ -130,10 +130,6 @@
         </ul>
       </li>
     </ul>
-    <div class="q-notes-extra" id="q-extra">
-      <p><strong>Yêu cầu khác:</strong></p>
-      <div class="q-extra-body" id="q-extra-body"></div>
-    </div>
   </div>
 
   <h2 class="q-section">Đơn giá sử dụng bơm:</h2>
