@@ -277,42 +277,64 @@
     })[c]);
   }
 
-  // ---------- persistence ----------
-  function saveState() {
-    const state = {
+  // ---------- state <-> form (tái dùng cho draft, template, lịch sử) ----------
+  // Gom toàn bộ giá trị form thành 1 object.
+  function collectState() {
+    return {
       date: val('f-date'),
       customer: val('f-customer'), project: val('f-project'),
       pump1Ca: val('f-pump1-ca'), pump1M3: val('f-pump1-m3'),
       pump2Ca: val('f-pump2-ca'), pump2M3: val('f-pump2-m3'),
       vat: document.getElementById('f-vat').checked,
       extra: val('f-extra'),
-      rows,
+      rows: rows.map((r) => ({ name: r.name, price: r.price, slump: r.slump })),
     };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  // Chỉ phần giá (cho template mặc định).
+  function pricesFromState(s) {
+    return {
+      rows: (s.rows || []).map((r) => ({ name: r.name, price: r.price, slump: r.slump })),
+      pump1Ca: s.pump1Ca, pump1M3: s.pump1M3,
+      pump2Ca: s.pump2Ca, pump2M3: s.pump2M3,
+      vat: s.vat,
+    };
+  }
+
+  // Đổ 1 object vào form + rows, rồi render + sync preview.
+  function applyState(state) {
+    state = state || {};
+    setVal('f-date', state.date || formatToday());
+    setVal('f-customer', state.customer); setVal('f-project', state.project);
+    setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
+    setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
+    document.getElementById('f-vat').checked = !!state.vat;
+    setVal('f-extra', state.extra);
+    rows = Array.isArray(state.rows)
+      ? state.rows.slice(0, MAX_ROWS).map((r) => ({
+          name: r.name || '', price: r.price || '', slump: normalizeSlump(r.slump),
+        }))
+      : [];
+    renderRowList();
+    syncAll();
+  }
+
+  // ---------- persistence (bản nháp đang gõ) ----------
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState())); } catch (_) {}
   }
 
   function loadState() {
     let state = null;
     try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (_) {}
-    if (!state) {
-      setVal('f-date', formatToday());
-      return;
-    }
+    if (!state) { applyState({ date: formatToday() }); return; }
     // migrate: state cũ lưu day/month/year riêng → ghép "dd/mm/yyyy"
     let date = state.date;
     if (!date && (state.day || state.month || state.year)) {
       const pad = (v, n) => String(v || '').padStart(n, '0');
       date = pad(state.day, 2) + '/' + pad(state.month, 2) + '/' + pad(state.year, 4);
     }
-    setVal('f-date', date);
-    setVal('f-customer', state.customer); setVal('f-project', state.project);
-    setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
-    setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
-    document.getElementById('f-vat').checked = !!state.vat;
-    setVal('f-extra', state.extra);
-    rows = Array.isArray(state.rows) ? state.rows.slice(0, MAX_ROWS) : [];
-    // migrate: chuẩn hoá độ sụt dòng cũ ("10" → "10±2", thiếu → mặc định)
-    rows.forEach((r) => { r.slump = normalizeSlump(r.slump); });
+    applyState(Object.assign({}, state, { date }));
   }
 
   const val = (id) => (document.getElementById(id)?.value || '');
@@ -347,6 +369,9 @@
 
     document.getElementById('btn-print').addEventListener('click', () => {
       saveState();
+      // Tự lưu snapshot vào lịch sử mỗi lần tạo báo giá.
+      try { window.QuotesStore.addQuote(collectState()); } catch (_) {}
+      try { window.QuoteActions.refresh(); } catch (_) {}
       // Một số iOS PWA standalone không hỗ trợ window.print() → báo cho user
       if (typeof window.print !== 'function') {
         alert('Trình duyệt này không hỗ trợ in. Hãy mở Báo Giá trong Safari/Chrome và dùng menu Chia sẻ → In.');
@@ -363,6 +388,11 @@
     renderChips();
     renderRowList();
     syncAll();
+
+    // Nối các tính năng mới (template / lịch sử / gợi ý) — module riêng.
+    try {
+      window.QuoteActions.init({ collectState, applyState, pricesFromState, persist: saveState });
+    } catch (_) {}
   }
 
   if (document.readyState === 'loading') {
