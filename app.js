@@ -101,7 +101,24 @@
     syncVat();
     syncExtra();
     syncMacPreview();
+    syncPump();
     fitToTwoPages();
+  }
+
+  // ---------- ẩn/hiện phần bơm ----------
+  // Nếu KHÔNG nhập giá bơm nào (trống hoặc = 0) → ẩn toàn bộ mục "Đơn giá
+  // sử dụng bơm" (cả tiêu đề lẫn bảng). Chỉ cần 1 ô có giá > 0 → hiện lại.
+  const PUMP_FIELDS = ['f-pump1-ca', 'f-pump1-m3', 'f-pump2-ca', 'f-pump2-m3'];
+  function syncPump() {
+    const hasPrice = PUMP_FIELDS.some((id) => {
+      const d = digitsOnly(val(id));
+      return d && Number(d) > 0;
+    });
+    const heading = document.getElementById('q-pump-heading');
+    const table = document.getElementById('q-pump-table');
+    const display = hasPrice ? '' : 'none';
+    if (heading) heading.style.display = display;
+    if (table) table.style.display = display;
   }
 
   // ---------- ghi chú thêm ----------
