@@ -4,6 +4,8 @@
 
   const STORAGE_KEY = 'baogia-mktt-v2';
   const MAX_ROWS = 10;
+  // Người liên hệ mặc định — luôn điền sẵn nhưng có thể sửa cho từng báo giá.
+  const DEFAULT_CONTACT = '0903.071.734 Mr Đạt';
 
   // Gợi ý mác — bấm chip để thêm nhanh
   const SUGGESTIONS = [
@@ -99,6 +101,7 @@
     bindings.forEach(syncBinding);
     syncDate();
     syncVat();
+    syncContact();
     syncExtra();
     syncMacPreview();
     syncPump();
@@ -119,6 +122,17 @@
     const display = hasPrice ? '' : 'none';
     if (heading) heading.style.display = display;
     if (table) table.style.display = display;
+  }
+
+  // ---------- người liên hệ ----------
+  // Mặc định tick sẵn → dùng DEFAULT_CONTACT, ẩn ô nhập.
+  // Bỏ tick → hiện ô nhập để tự điền; trống thì vẫn fallback về mặc định.
+  function syncContact() {
+    const useDefault = isChecked('f-contact-default');
+    const wrap = document.getElementById('f-contact-wrap');
+    if (wrap) wrap.hidden = useDefault;
+    const custom = val('f-contact').trim();
+    setText('q-contact', (!useDefault && custom) ? custom : DEFAULT_CONTACT);
   }
 
   // ---------- ghi chú thêm ----------
@@ -303,6 +317,7 @@
     return {
       date: val('f-date'),
       customer: val('f-customer'), project: val('f-project'),
+      contact: val('f-contact'), contactDefault: isChecked('f-contact-default'),
       pump1Ca: val('f-pump1-ca'), pump1M3: val('f-pump1-m3'),
       pump2Ca: val('f-pump2-ca'), pump2M3: val('f-pump2-m3'),
       vat: document.getElementById('f-vat').checked,
@@ -326,6 +341,10 @@
     state = state || {};
     setVal('f-date', state.date || formatToday());
     setVal('f-customer', state.customer); setVal('f-project', state.project);
+    // Bản nháp cũ (chưa có contactDefault): coi như dùng mặc định nếu chưa từng tự điền.
+    setVal('f-contact', state.contact === DEFAULT_CONTACT ? '' : state.contact);
+    setChecked('f-contact-default',
+      state.contactDefault != null ? state.contactDefault : !String(state.contact || '').trim());
     setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
     document.getElementById('f-vat').checked = !!state.vat;
@@ -354,6 +373,8 @@
 
   const val = (id) => (document.getElementById(id)?.value || '');
   const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  const isChecked = (id) => !!document.getElementById(id)?.checked;
+  const setChecked = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
 
   // ---------- wiring ----------
   let saveTimer = null;
@@ -371,6 +392,10 @@
       el.addEventListener('input', onAnyChange);
     });
     document.getElementById('f-vat').addEventListener('change', onAnyChange);
+    document.getElementById('f-contact-default').addEventListener('change', (e) => {
+      onAnyChange();
+      if (!e.target.checked) document.getElementById('f-contact').focus();
+    });
     document.getElementById('f-extra').addEventListener('input', onAnyChange);
 
     document.getElementById('btn-add-mac').addEventListener('click', () => {
