@@ -109,17 +109,15 @@
   }
 
   // ---------- ẩn/hiện phần bơm ----------
-  // Nếu KHÔNG nhập giá bơm nào (trống hoặc = 0) → ẩn toàn bộ mục "Đơn giá
-  // sử dụng bơm" (cả tiêu đề lẫn bảng). Chỉ cần 1 ô có giá > 0 → hiện lại.
-  const PUMP_FIELDS = ['f-pump1-ca', 'f-pump1-m3', 'f-pump2-ca', 'f-pump2-m3'];
+  // Tick "Có báo giá bơm" → hiện ô nhập giá + mục "Đơn giá sử dụng bơm"
+  // (tiêu đề lẫn bảng) trong báo giá. Bỏ tick → ẩn hoàn toàn.
   function syncPump() {
-    const hasPrice = PUMP_FIELDS.some((id) => {
-      const d = digitsOnly(val(id));
-      return d && Number(d) > 0;
-    });
+    const on = isChecked('f-pump-on');
+    const wrap = document.getElementById('f-pump-wrap');
+    if (wrap) wrap.hidden = !on;
     const heading = document.getElementById('q-pump-heading');
     const table = document.getElementById('q-pump-table');
-    const display = hasPrice ? '' : 'none';
+    const display = on ? '' : 'none';
     if (heading) heading.style.display = display;
     if (table) table.style.display = display;
   }
@@ -318,6 +316,7 @@
       date: val('f-date'),
       customer: val('f-customer'), project: val('f-project'),
       contact: val('f-contact'), contactDefault: isChecked('f-contact-default'),
+      pumpOn: isChecked('f-pump-on'),
       pump1Ca: val('f-pump1-ca'), pump1M3: val('f-pump1-m3'),
       pump2Ca: val('f-pump2-ca'), pump2M3: val('f-pump2-m3'),
       vat: document.getElementById('f-vat').checked,
@@ -330,6 +329,7 @@
   function pricesFromState(s) {
     return {
       rows: (s.rows || []).map((r) => ({ name: r.name, price: r.price, slump: r.slump })),
+      pumpOn: s.pumpOn,
       pump1Ca: s.pump1Ca, pump1M3: s.pump1M3,
       pump2Ca: s.pump2Ca, pump2M3: s.pump2M3,
       vat: s.vat,
@@ -347,6 +347,11 @@
       state.contactDefault != null ? state.contactDefault : !String(state.contact || '').trim());
     setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
+    // Bản nháp/mẫu cũ (chưa có pumpOn): suy ra từ việc đã nhập giá bơm hay chưa.
+    setChecked('f-pump-on', state.pumpOn != null
+      ? state.pumpOn
+      : [state.pump1Ca, state.pump1M3, state.pump2Ca, state.pump2M3]
+          .some((v) => Number(digitsOnly(v)) > 0));
     document.getElementById('f-vat').checked = !!state.vat;
     setVal('f-extra', state.extra);
     rows = Array.isArray(state.rows)
@@ -395,6 +400,10 @@
     document.getElementById('f-contact-default').addEventListener('change', (e) => {
       onAnyChange();
       if (!e.target.checked) document.getElementById('f-contact').focus();
+    });
+    document.getElementById('f-pump-on').addEventListener('change', (e) => {
+      onAnyChange();
+      if (e.target.checked) document.getElementById('f-pump1-ca').focus();
     });
     document.getElementById('f-extra').addEventListener('input', onAnyChange);
 

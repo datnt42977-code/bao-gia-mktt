@@ -43,10 +43,13 @@
 
   <fieldset>
     <legend>Đơn giá bơm (VNĐ)</legend>
-    <label>Bơm ngang/cần 37m, tầng 0-4, ca &lt;28m³ <input type="text" id="f-pump1-ca" inputmode="decimal" class="num"></label>
-    <label>Bơm ngang/cần 37m, tầng 0-4, ≥28m³ <input type="text" id="f-pump1-m3" inputmode="decimal" class="num"></label>
-    <label>Bơm ngang/cần 37m, tầng 5-9, ca &lt;28m³ <input type="text" id="f-pump2-ca" inputmode="decimal" class="num"></label>
-    <label>Bơm ngang/cần 37m, tầng 5-9, ≥28m³ <input type="text" id="f-pump2-m3" inputmode="decimal" class="num"></label>
+    <label class="checkbox"><input type="checkbox" id="f-pump-on"> Có báo giá bơm</label>
+    <div id="f-pump-wrap" hidden>
+      <label>Bơm ngang/cần 37m, tầng 0-4, ca &lt;28m³ <input type="text" id="f-pump1-ca" inputmode="decimal" class="num"></label>
+      <label>Bơm ngang/cần 37m, tầng 0-4, ≥28m³ <input type="text" id="f-pump1-m3" inputmode="decimal" class="num"></label>
+      <label>Bơm ngang/cần 37m, tầng 5-9, ca &lt;28m³ <input type="text" id="f-pump2-ca" inputmode="decimal" class="num"></label>
+      <label>Bơm ngang/cần 37m, tầng 5-9, ≥28m³ <input type="text" id="f-pump2-m3" inputmode="decimal" class="num"></label>
+    </div>
   </fieldset>
 
   <fieldset>
