@@ -347,11 +347,8 @@
       state.contactDefault != null ? state.contactDefault : !String(state.contact || '').trim());
     setVal('f-pump1-ca', state.pump1Ca); setVal('f-pump1-m3', state.pump1M3);
     setVal('f-pump2-ca', state.pump2Ca); setVal('f-pump2-m3', state.pump2M3);
-    // Bản nháp/mẫu cũ (chưa có pumpOn): suy ra từ việc đã nhập giá bơm hay chưa.
-    setChecked('f-pump-on', state.pumpOn != null
-      ? state.pumpOn
-      : [state.pump1Ca, state.pump1M3, state.pump2Ca, state.pump2M3]
-          .some((v) => Number(digitsOnly(v)) > 0));
+    // Mặc định LUÔN có phần bơm; chỉ ẩn khi người dùng chủ động bỏ tick.
+    setChecked('f-pump-on', state.pumpOn !== false);
     document.getElementById('f-vat').checked = !!state.vat;
     setVal('f-extra', state.extra);
     rows = Array.isArray(state.rows)
