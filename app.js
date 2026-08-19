@@ -213,7 +213,8 @@
   }
 
   // ---------- dynamic mác rows ----------
-  let rows = []; // [{name, price, slump}]
+  // manual = người dùng đã tự gõ giá dòng này → không cho bậc giá ghi đè.
+  let rows = []; // [{name, price, slump, manual}]
   // Nhãn độ sụt hiển thị nguyên văn; "19±1" là loại đặc biệt.
   const SLUMP_OPTIONS = ['10±2', '12±2', '14±2', '16±2', '18±2', '19±1', '20±2'];
   const DEFAULT_SLUMP = '10±2';
@@ -225,6 +226,67 @@
     return SLUMP_OPTIONS.includes(withTol) ? withTol : DEFAULT_SLUMP;
   };
 
+  // ---------- bậc giá theo mác (mốc = M250) ----------
+  const ladder = () => window.MacPriceLadder;
+
+  // Dòng có thể được bậc giá tự điền: hệ M, không phải dòng mốc, chưa bị khoá tay.
+  function isDerivable(row, idx) {
+    const L = ladder();
+    if (!L || L.parseMacGrade(row.name) == null) return false;
+    if (idx === findAnchorIndex()) return false;
+    return !row.manual;
+  }
+
+  // Dòng mốc = dòng ĐẦU TIÊN có tên bắt đầu bằng M250.
+  function findAnchorIndex() {
+    const L = ladder();
+    if (!L) return -1;
+    return rows.findIndex((r) => L.isAnchorName(r.name));
+  }
+
+  // Tính lại giá mọi dòng suy ra được từ dòng mốc.
+  // Trả về true nếu có dòng nào đổi giá (để cập nhật ô nhập tương ứng).
+  function applyLadder() {
+    const L = ladder();
+    const anchorIdx = findAnchorIndex();
+    if (!L || anchorIdx < 0) return false;
+    const anchor = rows[anchorIdx];
+    const base = L.deriveBase(Number(digitsOnly(anchor.price)), anchor.slump);
+    if (base == null) return false;
+
+    let changed = false;
+    rows.forEach((row, idx) => {
+      if (!isDerivable(row, idx)) return;
+      const price = L.computePrice(base, row.name, row.slump);
+      const next = price == null ? '' : formatVN(String(price));
+      if (row.price !== next) { row.price = next; changed = true; }
+    });
+    return changed;
+  }
+
+  // Đẩy giá đã tính vào các ô nhập, trừ ô đang gõ (tránh nhảy con trỏ).
+  function syncPriceInputs(skipIdx) {
+    document.querySelectorAll('#mac-list .extra-row').forEach((div, idx) => {
+      if (!rows[idx]) return;
+      // Nút khoá luôn cập nhật, kể cả dòng đang gõ (vừa gõ là vừa bị khoá).
+      syncLockButton(div, idx);
+      if (idx === skipIdx) return;
+      const input = div.querySelector('input[data-field="price"]');
+      if (input && input.value !== rows[idx].price) input.value = rows[idx].price;
+    });
+  }
+
+  // Nút 🔒 chỉ hiện ở dòng hệ M (không phải mốc) đã bị gõ tay.
+  function syncLockButton(div, idx) {
+    const btn = div.querySelector('.btn-lock');
+    if (!btn) return;
+    const L = ladder();
+    const row = rows[idx];
+    const show = !!row && !!row.manual && L && L.parseMacGrade(row.name) != null
+      && idx !== findAnchorIndex();
+    btn.hidden = !show;
+  }
+
   function renderChips() {
     const root = document.getElementById('mac-chips');
     root.innerHTML = '';
@@ -235,7 +297,8 @@
       btn.textContent = name;
       btn.addEventListener('click', () => {
         if (rows.length >= MAX_ROWS) return;
-        rows.push({ name, price: '', slump: DEFAULT_SLUMP });
+        rows.push({ name, price: '', slump: DEFAULT_SLUMP, manual: false });
+        applyLadder();
         renderRowList();
         onAnyChange();
         // focus the new price input for fast entry
@@ -260,24 +323,49 @@
         <input type="text" placeholder="Tên mác" data-field="name" value="${escapeHtml(row.name)}">
         <input type="text" placeholder="Đơn giá" inputmode="decimal" data-field="price" value="${escapeHtml(row.price)}">
         <select data-field="slump" aria-label="Độ sụt">${options}</select>
+        <button type="button" class="btn-lock" aria-label="Mở khoá — tính lại theo mác 250" title="Giá tự sửa tay. Bấm để tính lại theo mác 250." hidden>&#128274;</button>
         <button type="button" class="btn-del" aria-label="Xóa">×</button>
       `;
       const nameInput = div.querySelector('input[data-field="name"]');
       const priceInput = div.querySelector('input[data-field="price"]');
       const slumpSelect = div.querySelector('select[data-field="slump"]');
+      const lockBtn = div.querySelector('.btn-lock');
       const delBtn = div.querySelector('.btn-del');
-      nameInput.addEventListener('input', () => { rows[idx].name = nameInput.value; onAnyChange(); });
+      nameInput.addEventListener('input', () => {
+        rows[idx].name = nameInput.value;
+        // Đổi tên dòng → dòng có thể thành/hết là mốc, tính lại cả bảng.
+        applyLadder();
+        syncPriceInputs(-1);
+        onAnyChange();
+      });
       priceInput.addEventListener('input', () => {
         priceInput.value = formatVN(priceInput.value);
         rows[idx].price = priceInput.value;
+        // Gõ tay vào dòng không phải mốc → khoá dòng đó lại.
+        if (idx !== findAnchorIndex()) rows[idx].manual = true;
+        applyLadder();
+        syncPriceInputs(idx);
         onAnyChange();
       });
-      slumpSelect.addEventListener('change', () => { rows[idx].slump = slumpSelect.value; onAnyChange(); });
+      slumpSelect.addEventListener('change', () => {
+        rows[idx].slump = slumpSelect.value;
+        applyLadder();
+        syncPriceInputs(-1);
+        onAnyChange();
+      });
+      lockBtn.addEventListener('click', () => {
+        rows[idx].manual = false;
+        applyLadder();
+        syncPriceInputs(-1);
+        onAnyChange();
+      });
       delBtn.addEventListener('click', () => {
         rows.splice(idx, 1);
+        // Xoá dòng mốc: các dòng còn lại giữ nguyên giá cuối cùng.
         renderRowList();
         onAnyChange();
       });
+      syncLockButton(div, idx);
       root.appendChild(div);
     });
     document.getElementById('btn-add-mac').disabled = rows.length >= MAX_ROWS;
@@ -321,14 +409,14 @@
       pump2Ca: val('f-pump2-ca'), pump2M3: val('f-pump2-m3'),
       vat: document.getElementById('f-vat').checked,
       extra: val('f-extra'),
-      rows: rows.map((r) => ({ name: r.name, price: r.price, slump: r.slump })),
+      rows: rows.map((r) => ({ name: r.name, price: r.price, slump: r.slump, manual: !!r.manual })),
     };
   }
 
   // Chỉ phần giá (cho template mặc định).
   function pricesFromState(s) {
     return {
-      rows: (s.rows || []).map((r) => ({ name: r.name, price: r.price, slump: r.slump })),
+      rows: (s.rows || []).map((r) => ({ name: r.name, price: r.price, slump: r.slump, manual: !!r.manual })),
       pumpOn: s.pumpOn,
       pump1Ca: s.pump1Ca, pump1M3: s.pump1M3,
       pump2Ca: s.pump2Ca, pump2M3: s.pump2M3,
@@ -354,8 +442,10 @@
     rows = Array.isArray(state.rows)
       ? state.rows.slice(0, MAX_ROWS).map((r) => ({
           name: r.name || '', price: r.price || '', slump: normalizeSlump(r.slump),
+          manual: !!r.manual,
         }))
       : [];
+    applyLadder();
     renderRowList();
     syncAll();
   }
@@ -406,7 +496,7 @@
 
     document.getElementById('btn-add-mac').addEventListener('click', () => {
       if (rows.length >= MAX_ROWS) return;
-      rows.push({ name: '', price: '', slump: DEFAULT_SLUMP });
+      rows.push({ name: '', price: '', slump: DEFAULT_SLUMP, manual: false });
       renderRowList();
       onAnyChange();
       const last = document.querySelector('#mac-list .extra-row:last-child input[data-field="name"]');

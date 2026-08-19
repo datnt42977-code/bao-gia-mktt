@@ -75,7 +75,7 @@ body {
 }
 .extra-row {
   display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: 1fr 1fr auto auto auto;
   gap: 6px;
   margin-top: 6px;
   align-items: center;
@@ -84,6 +84,15 @@ body {
   min-height: 36px;
   padding: 0 6px;
 }
+.extra-row .btn-lock {
+  width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: #fff8e1;
+  border-color: #e0a800;
+  font-size: 15px;
+}
+.extra-row .btn-lock[hidden] { display: none; }
 .extra-row .btn-del {
   width: 36px;
   min-height: 36px;

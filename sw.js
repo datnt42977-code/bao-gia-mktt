@@ -2,13 +2,14 @@
 // - App shell (html/js/css): network-first → luôn lấy bản mới, fallback cache khi offline
 // - Assets (ảnh, manifest): cache-first cho tốc độ
 // Bump VERSION khi deploy để xoá cache cũ.
-const VERSION = 'v28';
+const VERSION = 'v29';
 const CACHE = 'baogia-mktt-' + VERSION;
 const ASSETS = [
   './',
   'index.html',
   'styles.css',
   'app.js',
+  'mac-price-ladder.js',
   'quotes-store.js',
   'quote-actions.js',
   'manifest.json',
@@ -18,7 +19,7 @@ const ASSETS = [
 ];
 
 // File nào phải luôn lấy bản mới (network-first)
-const APP_SHELL = /\/(index\.html|app\.js|quotes-store\.js|quote-actions\.js|styles\.css)(\?|$)|\/$/;
+const APP_SHELL = /\/(index\.html|app\.js|mac-price-ladder\.js|quotes-store\.js|quote-actions\.js|styles\.css)(\?|$)|\/$/;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
